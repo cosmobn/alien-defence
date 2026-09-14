@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Alien Signal Defense</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <canvas id="gameCanvas" width="1280" height="720" aria-label="Alien Signal Defense game canvas"></canvas>
+  <input id="typingInput" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Typing input">
+  <button id="themeToggle" class="theme-toggle" type="button" aria-label="Switch to day mode" aria-pressed="false" title="Switch to day mode">
+    <span class="theme-toggle-icon" aria-hidden="true">☀</span>
+  </button>
+
+  <section id="titleScreen" class="overlay active">
+    <div class="title-kicker">Deep Space Typing Arcade</div>
+    <h1>Alien Signal Defense</h1>
+    <p class="lead">Destroy incoming ships by typing their signal codes before they reach Earth.</p>
+    <div class="title-stats">
+      <span>High Score</span>
+      <strong id="titleHighScore">0</strong>
+    </div>
+
+    <!-- MAIN MENU -->
+    <div id="mainMenu" class="menu-screen active">
+      <div class="menu-buttons-container">
+        <button id="playMenuButton" class="menu-button large-button" type="button">
+          <span class="button-label">PLAY</span>
+        </button>
+        <button id="accountMenuButton" class="menu-button large-button" type="button">
+          <span class="button-label">ACCOUNT</span>
+        </button>
+        <button id="leaderboardMenuButton" class="menu-button large-button" type="button">
+          <span class="button-label">LEADERBOARD</span>
+        </button>
+        <button id="scoresMenuButton" class="menu-button large-button" type="button">
+          <span class="button-label">MY SCORES</span>
+        </button>
+        <button id="progressMenuButton" class="menu-button large-button" type="button">
+          <span class="button-label">PROGRESS</span>
+        </button>
+        <button id="adminMenuButton" class="menu-button large-button" type="button" hidden>
+          <span class="button-label">ADMIN CONSOLE</span>
+        </button>
+      </div>
+    </div>
+
+    <div id="leaderboardMenu" class="menu-screen data-menu">
+      <div class="submenu-header"><span class="submenu-kicker">LEADERBOARD</span></div>
+      <p id="leaderboardMessage" class="menu-status" role="status"></p>
+      <div id="leaderboardList" class="data-list"></div>
+      <button id="backFromLeaderboardButton" class="back-button" type="button">Back</button>
+    </div>
+
+    <div id="scoresMenu" class="menu-screen data-menu">
+      <div class="submenu-header"><span class="submenu-kicker">MY SCORE HISTORY</span></div>
+      <p id="scoresMessage" class="menu-status" role="status"></p>
+      <div id="scoresList" class="data-list"></div>
+      <button id="backFromScoresButton" class="back-button" type="button">Back</button>
+    </div>
+
+    <div id="progressMenu" class="menu-screen data-menu">
+      <div class="submenu-header"><span class="submenu-kicker">PLAYER PROGRESS</span></div>
+      <p id="progressMessage" class="menu-status" role="status"></p>
+      <div id="progressGrid" class="progress-grid"></div>
+      <button id="backFromProgressButton" class="back-button" type="button">Back</button>
+    </div>
+
+    <!-- PLAY DIFFICULTY SELECTION SUBMENU -->
+    <div id="playMenu" class="menu-screen">
+      <div class="submenu-header">
+        <span class="submenu-kicker">SELECT DIFFICULTY</span>
+      </div>
+      <div class="difficulty-menu" aria-label="Difficulty">
+        <div class="difficulty-options">
+          <button class="difficulty-button" type="button" data-difficulty="easy">Easy</button>
+          <button class="difficulty-button active" type="button" data-difficulty="medium">Medium</button>
+          <button class="difficulty-button" type="button" data-difficulty="hard">Hard</button>
+        </div>
+      </div>
+      <button id="startButton" class="primary-button">Start Defense</button>
+      <button id="backFromPlayButton" class="back-button" type="button">Back</button>
+    </div>
+
+    <!-- ACCOUNT SUBMENU -->
+    <div id="accountMenu" class="menu-screen">
+      <!-- Not Logged In State -->
+      <div id="accountNotLoggedIn" class="account-submenu">
+        <div class="submenu-header">
+          <span class="submenu-kicker">ACCOUNT</span>
+        </div>
+        <div class="account-type-selector">
+          <div class="account-type-group">
+            <div class="account-type-title">PLAYER</div>
+            <a class="account-type-button" href="player-signup.html" data-nav="player-signup">
+              <span>CREATE ACCOUNT</span>
+            </a>
+            <a class="account-type-button" href="player-login.html" data-nav="player-login">
+              <span>SIGN IN</span>
+            </a>
+          </div>
+          <div class="account-type-group">
+            <div class="account-type-title">ADMIN</div>
+            <a class="account-type-button" href="admin-signup.html" data-nav="admin-signup">
+              <span>CREATE ACCOUNT</span>
+            </a>
+            <a class="account-type-button" href="admin-login.html" data-nav="admin-login">
+              <span>SIGN IN</span>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Logged In State (Player) -->
+      <div id="accountLoggedInPlayer" class="account-submenu" hidden>
+        <div class="submenu-header">
+          <span class="submenu-kicker">COMMANDER PROFILE</span>
+        </div>
+        <div class="account-info">
+          <div class="account-info-field">
+            <span class="account-info-label">Username</span>
+            <span class="account-info-value" id="accountUsernameDisplay">-</span>
+          </div>
+          <div class="account-info-field">
+            <span class="account-info-label">Role</span>
+            <span class="account-info-value">PLAYER</span>
+          </div>
+        </div>
+        <button id="logoutButtonPlayer" type="button" class="primary-button logout-button">LOG OUT</button>
+      </div>
+
+      <!-- Logged In State (Admin) -->
+      <div id="accountLoggedInAdmin" class="account-submenu" hidden>
+        <div class="submenu-header">
+          <span class="submenu-kicker">ADMIN PROFILE</span>
+        </div>
+        <div class="account-info">
+          <div class="account-info-field">
+            <span class="account-info-label">Username</span>
+            <span class="account-info-value" id="accountAdminUsernameDisplay">-</span>
+          </div>
+          <div class="account-info-field">
+            <span class="account-info-label">Role</span>
+            <span class="account-info-value">ADMINISTRATOR</span>
+          </div>
+        </div>
+        <button id="logoutButtonAdmin" type="button" class="primary-button logout-button">LOG OUT</button>
+      </div>
+
+      <button id="backFromAccountButton" class="back-button" type="button">Back</button>
+    </div>
+  </section>
+
+  <section id="waveOverlay" class="overlay wave-overlay">
+    <p id="waveText">WAVE 1 - INCOMING</p>
+  </section>
+
+  <section id="upgradeShop" class="overlay shop-overlay">
+    <div class="shop-shell">
+      <div class="shop-header">
+        <div>
+          <span class="title-kicker">Research Lab</span>
+          <h2>Consumable Defenses</h2>
+        </div>
+        <div class="research-pill">
+          RP <strong id="shopResearch">0</strong>
+        </div>
+      </div>
+      <div id="upgradeGrid" class="upgrade-grid"></div>
+      <button id="continueButton" class="primary-button">Continue</button>
+    </div>
+  </section>
+
+  <section id="gameOverScreen" class="overlay">
+    <div class="title-kicker">Signal Lost</div>
+    <h2>Game Over</h2>
+    <div class="gameover-stats">
+      <span>Final Score <strong id="finalScore">0</strong></span>
+      <span>Difficulty <strong id="finalDifficulty">-</strong></span>
+      <span>Wave Reached <strong id="finalWave">0</strong></span>
+      <span>Highest Score <strong id="finalHighScore">0</strong></span>
+    </div>
+    <p id="saveStatus" class="save-status" role="status"></p>
+    <div class="gameover-actions">
+      <button id="restartButton" class="primary-button" type="button">Restart</button>
+      <button id="exitGameOverButton" class="primary-button" type="button">Exit to Main Menu</button>
+    </div>
+  </section>
+
+  <section id="pauseOverlay" class="overlay pause-overlay" aria-label="Pause menu">
+    <div class="pause-shell">
+      <div class="title-kicker">Game State</div>
+      <h2>Paused</h2>
+      <div class="pause-actions">
+        <button id="resumeButton" class="primary-button" type="button">Continue</button>
+        <button id="pauseRestartButton" class="primary-button" type="button">Restart</button>
+        <button id="pauseExitButton" class="primary-button" type="button">Exit to Main Menu</button>
+      </div>
+    </div>
+  </section>
+
+  <dialog id="pauseConfirmDialog" class="pause-confirm-dialog">
+    <form method="dialog" class="pause-confirm-shell">
+      <h2 id="pauseConfirmTitle">Confirm Action</h2>
+      <p id="pauseConfirmMessage"></p>
+      <div class="pause-confirm-actions">
+        <button id="pauseConfirmButton" class="primary-button" value="confirm" type="submit">Confirm</button>
+        <button class="back-button" value="cancel" type="submit">Cancel</button>
+      </div>
+    </form>
+  </dialog>
+
+  <div id="powerToast" class="power-toast" role="status" aria-live="polite"></div>
+
+  <script src="game.js"></script>
+</body>
+</html>

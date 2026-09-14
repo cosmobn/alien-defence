@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Login | Alien Signal Defense</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="admin.css">
+  <style>
+    .auth-back-button {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 20px;
+      padding: 6px 12px;
+      border: 1px solid rgba(0, 212, 255, 0.5);
+      background: transparent;
+      color: var(--text-dim, #4A6FA5);
+      cursor: pointer;
+      font-family: var(--font-display, 'Orbitron', monospace);
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      transition: all 120ms ease;
+      border-radius: 2px;
+    }
+    
+    .auth-back-button:hover {
+      border-color: var(--neon-blue, #00D4FF);
+      color: var(--neon-blue, #00D4FF);
+      box-shadow: 0 0 12px rgba(0, 212, 255, 0.2);
+    }
+    
+    .auth-back-button::before {
+      content: '←';
+    }
+  </style>
+</head>
+<body class="auth-page">
+  <main class="auth-shell">
+    <section class="auth-panel">
+      <button id="backButton" class="auth-back-button" type="button">Back</button>
+      <p class="eyebrow">Mission Control</p>
+      <h1>Admin Login</h1>
+      <form id="loginForm" class="auth-form">
+        <label>
+          <span>Email</span>
+          <input name="email" type="email" autocomplete="email" required>
+        </label>
+        <label>
+          <span>Password</span>
+          <input name="password" type="password" autocomplete="current-password" required>
+        </label>
+        <button class="primary-action" type="submit">Enter Console</button>
+      </form>
+      <p id="authMessage" class="form-message" role="status"></p>
+      <p class="switch-link">Need an account? <a href="admin-signup.html">Create admin</a></p>
+    </section>
+  </main>
+  <script src="admin-auth.js"></script>
+  <script>
+    document.getElementById('backButton').addEventListener('click', () => {
+      const returnUrl = sessionStorage.getItem('navReturnUrl');
+      if (returnUrl) {
+        sessionStorage.removeItem('navReturnUrl');
+        window.location.href = returnUrl;
+      } else {
+        window.history.back();
+      }
+    });
+  </script>
+</body>
+</html>

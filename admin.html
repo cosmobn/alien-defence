@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Console | Alien Signal Defense</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+  <link rel="stylesheet" href="admin.css">
+</head>
+<body>
+  <div class="admin-layout">
+    <aside class="sidebar">
+      <div class="brand-block">
+        <span class="brand-mark">ASD</span>
+        <div>
+          <p>Alien Signal</p>
+          <strong>Admin Console</strong>
+        </div>
+      </div>
+      <nav id="tableNav" class="table-nav" aria-label="Database tables"></nav>
+      <a class="game-link" href="index.html"><i data-lucide="gamepad-2"></i> Game Page</a>
+    </aside>
+
+    <main class="console">
+      <header class="console-header">
+        <div>
+          <p class="eyebrow">Database Control</p>
+          <h1 id="tableTitle">Loading</h1>
+        </div>
+        <div class="header-actions">
+          <span id="adminIdentity" class="admin-pill"></span>
+          <button id="logoutButton" class="icon-button" type="button" aria-label="Log out" title="Log out">
+            <i data-lucide="log-out"></i>
+          </button>
+        </div>
+      </header>
+
+      <section class="toolbar">
+        <label class="search-box">
+          <i data-lucide="search"></i>
+          <input id="searchInput" type="search" placeholder="Search current table">
+        </label>
+        <button id="refreshButton" class="secondary-action" type="button"><i data-lucide="refresh-cw"></i> Refresh</button>
+        <button id="createButton" class="primary-action compact" type="button"><i data-lucide="plus"></i> New Record</button>
+      </section>
+
+      <section id="overviewGrid" class="status-grid" aria-label="Admin overview"></section>
+
+      <section class="status-grid">
+        <article>
+          <span>Rows Loaded</span>
+          <strong id="rowCount">0</strong>
+        </article>
+        <article>
+          <span>Active Table</span>
+          <strong id="activeTable">-</strong>
+        </article>
+        <article>
+          <span>Database</span>
+          <strong id="dbStatus">Checking</strong>
+        </article>
+      </section>
+
+      <section class="data-panel">
+        <div class="table-wrap">
+          <table>
+            <thead id="dataHead"></thead>
+            <tbody id="dataBody"></tbody>
+          </table>
+        </div>
+        <p id="emptyState" class="empty-state">No records found.</p>
+      </section>
+      <nav class="pagination" aria-label="Table pages">
+        <button id="previousPageButton" class="secondary-action" type="button">Previous</button>
+        <span id="pageStatus">Page 1</span>
+        <button id="nextPageButton" class="secondary-action" type="button">Next</button>
+      </nav>
+    </main>
+  </div>
+
+  <dialog id="recordDialog" class="record-dialog">
+    <form id="recordForm" method="dialog">
+      <div class="dialog-header">
+        <div>
+          <p class="eyebrow">Record Editor</p>
+          <h2 id="dialogTitle">New Record</h2>
+        </div>
+        <button class="icon-button" value="cancel" type="button" data-close-dialog aria-label="Close" title="Close">
+          <i data-lucide="x"></i>
+        </button>
+      </div>
+      <div id="formFields" class="form-grid"></div>
+      <p id="formMessage" class="form-message" role="status"></p>
+      <div class="dialog-actions">
+        <button class="secondary-action" type="button" data-close-dialog>Cancel</button>
+        <button class="primary-action compact" type="submit">Save Record</button>
+      </div>
+    </form>
+  </dialog>
+
+  <script src="admin.js"></script>
+</body>
+</html>
