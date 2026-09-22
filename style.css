@@ -542,6 +542,58 @@ h2 {
   outline-offset: 3px;
 }
 
+.music-control {
+  position: fixed;
+  bottom: 22px;
+  right: 22px;
+  z-index: 7;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 42px;
+  padding: 7px 9px;
+  border: 1px solid var(--neon-blue);
+  background: var(--panel);
+  color: var(--text-bright);
+  box-shadow: 0 0 18px rgba(0, 212, 255, 0.2);
+}
+
+.music-control-label,
+.music-volume-value {
+  color: var(--neon-green);
+  font-family: var(--font-display);
+  font-size: 11px;
+}
+
+.music-button {
+  min-width: 28px;
+  height: 28px;
+  border: 1px solid var(--neon-blue);
+  background: transparent;
+  color: var(--text-bright);
+  cursor: pointer;
+  font-family: var(--font-display);
+  font-size: 16px;
+  line-height: 1;
+}
+
+.music-mute-button {
+  min-width: 42px;
+  font-size: 10px;
+}
+
+.music-button:hover,
+.music-button:focus-visible {
+  border-color: var(--neon-green);
+  color: var(--neon-green);
+}
+
+.music-volume {
+  width: 100px;
+  accent-color: var(--neon-green);
+  cursor: pointer;
+}
+
 .power-toast.active {
   opacity: 1;
   transform: translateX(0);
@@ -572,6 +624,22 @@ h2 {
   .shop-header {
     align-items: flex-start;
     flex-direction: column;
+  }
+
+  .music-control {
+    bottom: 12px;
+    right: 12px;
+    gap: 5px;
+    padding: 6px;
+  }
+
+  .music-control-label,
+  .music-volume-value {
+    display: none;
+  }
+
+  .music-volume {
+    width: 76px;
   }
 }
 

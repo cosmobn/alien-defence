@@ -15,6 +15,15 @@
   <button id="themeToggle" class="theme-toggle" type="button" aria-label="Switch to day mode" aria-pressed="false" title="Switch to day mode">
     <span class="theme-toggle-icon" aria-hidden="true">☀</span>
   </button>
+  <audio id="gameMusic" src="assets/game-music.mp3" loop preload="auto"></audio>
+  <div class="music-control" aria-label="Music controls">
+    <span class="music-control-label">MUSIC</span>
+    <button id="musicDownButton" class="music-button" type="button" aria-label="Decrease music volume" title="Decrease music volume">−</button>
+    <input id="musicVolume" class="music-volume" type="range" min="0" max="100" step="1" value="16" aria-label="Music volume">
+    <button id="musicUpButton" class="music-button" type="button" aria-label="Increase music volume" title="Increase music volume">+</button>
+    <button id="musicMuteButton" class="music-button music-mute-button" type="button" aria-label="Mute music" aria-pressed="false" title="Mute music">MUTE</button>
+    <output id="musicVolumeValue" class="music-volume-value" for="musicVolume">16%</output>
+  </div>
 
   <section id="titleScreen" class="overlay active">
     <div class="title-kicker">Deep Space Typing Arcade</div>

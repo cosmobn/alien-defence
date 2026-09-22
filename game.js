@@ -53,6 +53,7 @@ const DIFFICULTY_WORD_BANKS = {
 
 const STORAGE_KEY = 'asd_highscore';
 const THEME_STORAGE_KEY = 'asd_theme';
+const MUSIC_VOLUME_STORAGE_KEY = 'asd_music_volume';
 
 /* === WORD BANKS === */
 const WORDS = {
@@ -120,6 +121,12 @@ const upgradeGrid = document.getElementById('upgradeGrid');
 const powerToast = document.getElementById('powerToast');
 const difficultyButtons = document.querySelectorAll('.difficulty-button');
 const themeToggle = document.getElementById('themeToggle');
+const gameMusic = document.getElementById('gameMusic');
+const musicVolume = document.getElementById('musicVolume');
+const musicDownButton = document.getElementById('musicDownButton');
+const musicUpButton = document.getElementById('musicUpButton');
+const musicMuteButton = document.getElementById('musicMuteButton');
+const musicVolumeValue = document.getElementById('musicVolumeValue');
 
 /* === GAME STATE === */
 const State = {
@@ -606,6 +613,11 @@ const Theme = {
 
 /* === AUDIO SYSTEM === */
 const AudioSystem = {
+  loadMusicSettings() {
+    const savedVolume = Number(localStorage.getItem(MUSIC_VOLUME_STORAGE_KEY));
+    const volume = Number.isFinite(savedVolume) ? Math.max(0, Math.min(1, savedVolume)) : CONFIG.audio.musicVolume;
+    this.setMusicVolume(volume, false);
+  },
   ensure() {
     if (!State.audio.ctx) this.createGraph();
     if (State.audio.ctx.state === 'suspended') State.audio.ctx.resume();
@@ -625,16 +637,35 @@ const AudioSystem = {
     master.connect(ctx.destination);
     Object.assign(State.audio, { ctx, master, sfxGain, musicGain });
   },
-  startMusic() {
+  startMusic(restart = false) {
     this.ensure();
-    if (!State.audio.ctx || State.audio.musicTimer) return;
-    this.playMusicPulse();
-    State.audio.musicTimer = setInterval(() => this.playMusicPulse(), CONFIG.audio.musicStepMs);
+    if (!gameMusic) return;
+    if (restart) gameMusic.currentTime = 0;
+    gameMusic.play().catch(() => {});
   },
   stopMusic() {
-    if (!State.audio.musicTimer) return;
-    clearInterval(State.audio.musicTimer);
-    State.audio.musicTimer = null;
+    if (gameMusic) gameMusic.pause();
+  },
+  setMusicVolume(volume, persist = true) {
+    const normalizedVolume = Math.max(0, Math.min(1, Number(volume) || 0));
+    if (gameMusic) gameMusic.volume = normalizedVolume;
+    if (musicVolume) musicVolume.value = String(Math.round(normalizedVolume * 100));
+    if (musicVolumeValue) musicVolumeValue.value = `${Math.round(normalizedVolume * 100)}%`;
+    if (musicMuteButton) {
+      const muted = normalizedVolume === 0;
+      musicMuteButton.textContent = muted ? 'ON' : 'MUTE';
+      musicMuteButton.setAttribute('aria-label', muted ? 'Unmute music' : 'Mute music');
+      musicMuteButton.setAttribute('title', muted ? 'Unmute music' : 'Mute music');
+      musicMuteButton.setAttribute('aria-pressed', String(muted));
+    }
+    if (persist) localStorage.setItem(MUSIC_VOLUME_STORAGE_KEY, String(normalizedVolume));
+  },
+  adjustMusicVolume(amount) {
+    this.setMusicVolume(Number(musicVolume.value) / 100 + amount);
+  },
+  toggleMusicMute() {
+    const currentVolume = Number(musicVolume.value) / 100;
+    this.setMusicVolume(currentVolume > 0 ? 0 : CONFIG.audio.musicVolume);
   },
   playTyping() {
     this.playTone({ frequency: randomRange(720, 860), duration: 0.045, type: 'square', gain: 0.08 });
@@ -736,6 +767,7 @@ function init() {
   buildStars();
   updateScoreLabels();
   bindEvents();
+  AudioSystem.loadMusicSettings();
   MenuSystem.init();
   MenuSystem.restoreMenuState();
   renderUpgradeShop();
@@ -756,6 +788,10 @@ function bindEvents() {
   });
   document.getElementById('continueButton').addEventListener('click', startNextWave);
   themeToggle.addEventListener('click', () => Theme.toggle());
+  musicVolume.addEventListener('input', event => AudioSystem.setMusicVolume(Number(event.target.value) / 100));
+  musicDownButton.addEventListener('click', () => AudioSystem.adjustMusicVolume(-0.05));
+  musicUpButton.addEventListener('click', () => AudioSystem.adjustMusicVolume(0.05));
+  musicMuteButton.addEventListener('click', () => AudioSystem.toggleMusicMute());
   difficultyButtons.forEach(button => {
     button.addEventListener('click', () => setDifficulty(button.dataset.difficulty));
   });
@@ -860,7 +896,7 @@ async function startGame() {
   }
   State.gameSessionId = data.game.session_id;
   AudioSystem.ensure();
-  AudioSystem.startMusic();
+  AudioSystem.startMusic(true);
   resetRun();
   hideAllOverlays();
   startNextWave();
