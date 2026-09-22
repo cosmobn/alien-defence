@@ -1,0 +1,969 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Alien Signal Defense API</title>
+    <link rel="stylesheet" href="https://unpkg.com/swagger-ui-dist@5.17.14/swagger-ui.css" />
+    <style>
+      html {
+        box-sizing: border-box;
+        overflow: -moz-scrollbars-vertical;
+        overflow-y: scroll;
+      }
+      *, *:before, *:after {
+        box-sizing: inherit;
+      }
+      body {
+        margin: 0;
+        background: #0f172a;
+        color: #e2e8f0;
+      }
+      .topbar {
+        background: #020817;
+        border-bottom: 1px solid #1e293b;
+      }
+      .topbar-wrapper {
+        max-width: 1200px;
+        margin: 0 auto;
+      }
+      .swagger-ui {
+        color: #ffffff !important;
+      }
+      .swagger-ui .info {
+        margin: 40px 0;
+      }
+      .swagger-ui .info .title,
+      .swagger-ui .info .title a,
+      .swagger-ui .info .description,
+      .swagger-ui .info .description p,
+      .swagger-ui .opblock-summary,
+      .swagger-ui .opblock-summary-description,
+      .swagger-ui .parameter__name,
+      .swagger-ui .parameter__type,
+      .swagger-ui .response-col_status,
+      .swagger-ui .table-header,
+      .swagger-ui label,
+      .swagger-ui .tab li,
+      .swagger-ui .markdown p,
+      .swagger-ui .markdown li,
+      .swagger-ui .scheme-container,
+      .swagger-ui .section-header,
+      .swagger-ui .model-title,
+      .swagger-ui .model {
+        color: #ffffff !important;
+      }
+      .swagger-ui .opblock .opblock-summary-description {
+        color: #f8fafc;
+      }
+      .swagger-ui .scheme-container {
+        background: #0b1120;
+        box-shadow: none;
+        border: 1px solid #1e293b;
+      }
+      .swagger-ui .opblock,
+      .swagger-ui .opblock .opblock-summary,
+      .swagger-ui .opblock .opblock-section-header,
+      .swagger-ui .responses-wrapper,
+      .swagger-ui .table-container,
+      .swagger-ui .model-box,
+      .swagger-ui .model-container {
+        background: #0f172a !important;
+        color: #ffffff !important;
+      }
+      .swagger-ui .btn.authorize {
+        background: #2563eb;
+        border-color: #2563eb;
+      }
+      .swagger-ui .btn.execute {
+        background: #10b981;
+        border-color: #10b981;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="swagger-ui"></div>
+
+    <script src="https://unpkg.com/swagger-ui-dist@5.17.14/swagger-ui-bundle.js"></script>
+    <script>
+      const spec = {
+        openapi: '3.0.3',
+        info: {
+          title: 'Alien Signal Defense API',
+          version: '1.0.0',
+          description: 'REST API for the Alien Signal Defense game, admin dashboard, and player accounts.'
+        },
+        servers: [
+          { url: 'http://localhost:3000', description: 'Local development server' },
+          { url: 'https://localhost:3000', description: 'Local HTTPS server (if configured)' }
+        ],
+        components: {
+          securitySchemes: {
+            cookieAuth: {
+              type: 'apiKey',
+              in: 'cookie',
+              name: 'connect.sid',
+              description: 'Session cookie used by Express for admin and player authentication.'
+            }
+          },
+          schemas: {
+            HealthResponse: {
+              type: 'object',
+              properties: {
+                ok: { type: 'boolean', example: true },
+                database: { type: 'boolean', example: true },
+                error: { type: 'string', nullable: true, example: null }
+              }
+            },
+            AdminSession: {
+              type: 'object',
+              properties: {
+                admin_id: { type: 'integer', example: 1 },
+                username: { type: 'string', example: 'owner' },
+                email: { type: 'string', example: 'owner@example.com' },
+                role: { type: 'string', enum: ['admin', 'owner'], example: 'owner' },
+                status: { type: 'string', enum: ['active', 'disabled'], example: 'active' }
+              }
+            },
+            PlayerSession: {
+              type: 'object',
+              properties: {
+                player_id: { type: 'integer', example: 1 },
+                username: { type: 'string', example: 'pilot01' },
+                email: { type: 'string', example: 'pilot@example.com' },
+                total_score: { type: 'integer', example: 1200 },
+                highest_wave: { type: 'integer', example: 9 },
+                status: { type: 'string', enum: ['active', 'inactive', 'banned'], example: 'active' }
+              }
+            },
+            ErrorResponse: {
+              type: 'object',
+              properties: {
+                error: { type: 'string', example: 'Invalid admin credentials.' }
+              }
+            },
+            AdminSignupRequest: {
+              type: 'object',
+              required: ['username', 'email', 'password'],
+              properties: {
+                username: { type: 'string', example: 'admin1' },
+                email: { type: 'string', format: 'email', example: 'admin1@example.com' },
+                password: { type: 'string', minLength: 8, example: 'secretpass' }
+              }
+            },
+            AdminLoginRequest: {
+              type: 'object',
+              required: ['email', 'password'],
+              properties: {
+                email: { type: 'string', format: 'email', example: 'admin1@example.com' },
+                password: { type: 'string', example: 'secretpass' }
+              }
+            },
+            PlayerSignupRequest: {
+              type: 'object',
+              required: ['username', 'email', 'password'],
+              properties: {
+                username: { type: 'string', example: 'pilot01' },
+                email: { type: 'string', format: 'email', example: 'pilot01@example.com' },
+                password: { type: 'string', minLength: 8, example: 'secretpass' }
+              }
+            },
+            PlayerLoginRequest: {
+              type: 'object',
+              required: ['email', 'password'],
+              properties: {
+                email: { type: 'string', format: 'email', example: 'pilot01@example.com' },
+                password: { type: 'string', example: 'secretpass' }
+              }
+            },
+            StartGameRequest: {
+              type: 'object',
+              required: ['difficulty'],
+              properties: {
+                difficulty: { type: 'string', enum: ['easy', 'medium', 'hard'], example: 'medium' }
+              }
+            },
+            CompleteGameRequest: {
+              type: 'object',
+              required: ['final_score', 'highest_wave', 'result', 'enemies_defeated'],
+              properties: {
+                final_score: { type: 'integer', minimum: 0, maximum: 100000000, example: 3200 },
+                highest_wave: { type: 'integer', minimum: 1, maximum: 1000, example: 8 },
+                result: { type: 'string', enum: ['won', 'lost', 'abandoned'], example: 'won' },
+                research_points: { type: 'integer', minimum: 0, example: 125 },
+                enemies_defeated: { type: 'integer', minimum: 0, maximum: 100000, example: 52 },
+                waves: {
+                  type: 'array',
+                  items: {
+                    type: 'object',
+                    properties: {
+                      wave_number: { type: 'integer', example: 1 },
+                      enemies_defeated: { type: 'integer', example: 4 },
+                      research_points_earned: { type: 'integer', example: 10 },
+                      survived: { type: 'boolean', example: true }
+                    }
+                  }
+                }
+              }
+            },
+            TableRow: {
+              type: 'object',
+              additionalProperties: true,
+              description: 'Row object for a table in the admin data browser.'
+            },
+            TableConfig: {
+              type: 'object',
+              additionalProperties: true,
+              description: 'Configuration describing a table and editable fields.'
+            }
+          }
+        },
+        security: [{ cookieAuth: [] }],
+        paths: {
+          '/api/health': {
+            get: {
+              tags: ['System'],
+              summary: 'Check API and database health',
+              responses: {
+                '200': {
+                  description: 'API is healthy',
+                  content: {
+                    'application/json': {
+                      schema: { $ref: '#/components/schemas/HealthResponse' }
+                    }
+                  }
+                },
+                '503': {
+                  description: 'Database check failed',
+                  content: {
+                    'application/json': {
+                      schema: { $ref: '#/components/schemas/HealthResponse' }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          '/api/auth/me': {
+            get: {
+              tags: ['Admin Auth'],
+              summary: 'Get current admin session',
+              security: [{ cookieAuth: [] }],
+              responses: {
+                '200': {
+                  description: 'Current admin session or null',
+                  content: {
+                    'application/json': {
+                      schema: {
+                        type: 'object',
+                        properties: {
+                          admin: {
+                            oneOf: [
+                              { $ref: '#/components/schemas/AdminSession' },
+                              { type: 'null' }
+                            ]
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          '/api/auth/signup': {
+            post: {
+              tags: ['Admin Auth'],
+              summary: 'Create a new admin account',
+              requestBody: {
+                required: true,
+                content: {
+                  'application/json': {
+                    schema: { $ref: '#/components/schemas/AdminSignupRequest' }
+                  }
+                }
+              },
+              responses: {
+                '201': {
+                  description: 'Admin account created',
+                  content: {
+                    'application/json': {
+                      schema: {
+                        type: 'object',
+                        properties: {
+                          admin: { $ref: '#/components/schemas/AdminSession' }
+                        }
+                      }
+                    }
+                  }
+                },
+                '400': { description: 'Bad request' },
+                '403': { description: 'Existing admin account already exists' }
+              }
+            }
+          },
+          '/api/auth/login': {
+            post: {
+              tags: ['Admin Auth'],
+              summary: 'Log in as admin',
+              requestBody: {
+                required: true,
+                content: {
+                  'application/json': {
+                    schema: { $ref: '#/components/schemas/AdminLoginRequest' }
+                  }
+                }
+              },
+              responses: {
+                '200': {
+                  description: 'Admin logged in',
+                  content: {
+                    'application/json': {
+                      schema: {
+                        type: 'object',
+                        properties: {
+                          admin: { $ref: '#/components/schemas/AdminSession' }
+                        }
+                      }
+                    }
+                  }
+                },
+                '401': { description: 'Invalid admin credentials' }
+              }
+            }
+          },
+          '/api/auth/logout': {
+            post: {
+              tags: ['Admin Auth'],
+              summary: 'Log out admin session',
+              security: [{ cookieAuth: [] }],
+              responses: {
+                '200': {
+                  description: 'Logout successful',
+                  content: {
+                    'application/json': {
+                      schema: {
+                        type: 'object',
+                        properties: {
+                          ok: { type: 'boolean', example: true }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          '/api/player/me': {
+            get: {
+              tags: ['Player Auth'],
+              summary: 'Get current player session',
+              security: [{ cookieAuth: [] }],
+              responses: {
+                '200': {
+                  description: 'Current player session or null',
+                  content: {
+                    'application/json': {
+                      schema: {
+                        type: 'object',
+                        properties: {
+                          player: {
+                            oneOf: [
+                              { $ref: '#/components/schemas/PlayerSession' },
+                              { type: 'null' }
+                            ]
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          '/api/player/signup': {
+            post: {
+              tags: ['Player Auth'],
+              summary: 'Create a new player account',
+              requestBody: {
+                required: true,
+                content: {
+                  'application/json': {
+                    schema: { $ref: '#/components/schemas/PlayerSignupRequest' }
+                  }
+                }
+              },
+              responses: {
+                '201': {
+                  description: 'Player account created',
+                  content: {
+                    'application/json': {
+                      schema: {
+                        type: 'object',
+                        properties: {
+                          player: { $ref: '#/components/schemas/PlayerSession' }
+                        }
+                      }
+                    }
+                  }
+                },
+                '400': { description: 'Bad request' }
+              }
+            }
+          },
+          '/api/player/login': {
+            post: {
+              tags: ['Player Auth'],
+              summary: 'Log in as player',
+              requestBody: {
+                required: true,
+                content: {
+                  'application/json': {
+                    schema: { $ref: '#/components/schemas/PlayerLoginRequest' }
+                  }
+                }
+              },
+              responses: {
+                '200': {
+                  description: 'Player logged in',
+                  content: {
+                    'application/json': {
+                      schema: {
+                        type: 'object',
+                        properties: {
+                          player: { $ref: '#/components/schemas/PlayerSession' }
+                        }
+                      }
+                    }
+                  }
+                },
+                '401': { description: 'Invalid credentials' }
+              }
+            }
+          },
+          '/api/player/logout': {
+            post: {
+              tags: ['Player Auth'],
+              summary: 'Log out player session',
+              security: [{ cookieAuth: [] }],
+              responses: {
+                '200': {
+                  description: 'Logout successful',
+                  content: {
+                    'application/json': {
+                      schema: {
+                        type: 'object',
+                        properties: {
+                          ok: { type: 'boolean', example: true }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          '/api/player/games/start': {
+            post: {
+              tags: ['Player Game'],
+              summary: 'Start a new game session',
+              security: [{ cookieAuth: [] }],
+              requestBody: {
+                required: true,
+                content: {
+                  'application/json': {
+                    schema: { $ref: '#/components/schemas/StartGameRequest' }
+                  }
+                }
+              },
+              responses: {
+                '201': {
+                  description: 'Game session created',
+                  content: {
+                    'application/json': {
+                      schema: {
+                        type: 'object',
+                        properties: {
+                          game: {
+                            type: 'object',
+                            properties: {
+                              session_id: { type: 'integer', example: 42 },
+                              started_at: { type: 'string', format: 'date-time', example: '2026-09-21T10:11:00.000Z' },
+                              difficulty: { type: 'string', enum: ['easy', 'medium', 'hard'], example: 'medium' }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                '400': { description: 'Invalid difficulty' }
+              }
+            }
+          },
+          '/api/player/games/{id}/complete': {
+            post: {
+              tags: ['Player Game'],
+              summary: 'Complete a game session',
+              security: [{ cookieAuth: [] }],
+              parameters: [
+                {
+                  name: 'id',
+                  in: 'path',
+                  required: true,
+                  schema: { type: 'integer' },
+                  description: 'Game session id'
+                }
+              ],
+              requestBody: {
+                required: true,
+                content: {
+                  'application/json': {
+                    schema: { $ref: '#/components/schemas/CompleteGameRequest' }
+                  }
+                }
+              },
+              responses: {
+                '201': {
+                  description: 'Game completed',
+                  content: {
+                    'application/json': {
+                      schema: {
+                        type: 'object',
+                        properties: {
+                          session_id: { type: 'integer', example: 42 },
+                          player: { $ref: '#/components/schemas/PlayerSession' },
+                          highest_score: { type: 'integer', example: 3200 }
+                        }
+                      }
+                    }
+                  }
+                },
+                '400': { description: 'Invalid game result' },
+                '404': { description: 'Game session not found' },
+                '409': { description: 'Game already completed' }
+              }
+            }
+          },
+          '/api/player/games/{id}/abandon': {
+            post: {
+              tags: ['Player Game'],
+              summary: 'Abandon an open game session',
+              security: [{ cookieAuth: [] }],
+              parameters: [
+                {
+                  name: 'id',
+                  in: 'path',
+                  required: true,
+                  schema: { type: 'integer' },
+                  description: 'Game session id'
+                }
+              ],
+              responses: {
+                '200': {
+                  description: 'Session abandoned',
+                  content: {
+                    'application/json': {
+                      schema: {
+                        type: 'object',
+                        properties: {
+                          ok: { type: 'boolean', example: true }
+                        }
+                      }
+                    }
+                  }
+                },
+                '404': { description: 'Open game session not found' }
+              }
+            }
+          },
+          '/api/player/scores': {
+            get: {
+              tags: ['Player Stats'],
+              summary: 'Get player game scores',
+              security: [{ cookieAuth: [] }],
+              responses: {
+                '200': {
+                  description: 'Completed scores',
+                  content: {
+                    'application/json': {
+                      schema: {
+                        type: 'object',
+                        properties: {
+                          scores: {
+                            type: 'array',
+                            items: {
+                              type: 'object',
+                              properties: {
+                                session_id: { type: 'integer', example: 42 },
+                                final_score: { type: 'integer', example: 3200 },
+                                difficulty: { type: 'string', example: 'medium' },
+                                highest_wave: { type: 'integer', example: 8 },
+                                result: { type: 'string', enum: ['won', 'lost'], example: 'won' },
+                                research_points: { type: 'integer', example: 125 },
+                                ended_at: { type: 'string', format: 'date-time', example: '2026-09-21T10:12:00.000Z' }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          '/api/player/progress': {
+            get: {
+              tags: ['Player Stats'],
+              summary: 'Get player progress summary',
+              security: [{ cookieAuth: [] }],
+              responses: {
+                '200': {
+                  description: 'Player progress summary',
+                  content: {
+                    'application/json': {
+                      schema: {
+                        type: 'object',
+                        properties: {
+                          progress: {
+                            type: 'object',
+                            properties: {
+                              games_played: { type: 'integer', example: 12 },
+                              highest_score: { type: 'integer', example: 3200 },
+                              highest_wave: { type: 'integer', example: 8 },
+                              enemies_defeated: { type: 'integer', example: 152 },
+                              average_score: { type: 'integer', example: 2000 },
+                              last_played: { type: 'string', format: 'date-time', nullable: true, example: '2026-09-21T10:12:00.000Z' }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          '/api/player/leaderboard': {
+            get: {
+              tags: ['Player Stats'],
+              summary: 'Get top player leaderboard',
+              responses: {
+                '200': {
+                  description: 'Leaderboard results',
+                  content: {
+                    'application/json': {
+                      schema: {
+                        type: 'object',
+                        properties: {
+                          leaderboard: {
+                            type: 'array',
+                            items: {
+                              type: 'object',
+                              properties: {
+                                username: { type: 'string', example: 'pilot01' },
+                                final_score: { type: 'integer', example: 3200 },
+                                difficulty: { type: 'string', example: 'medium' },
+                                highest_wave: { type: 'integer', example: 8 },
+                                ended_at: { type: 'string', format: 'date-time', example: '2026-09-21T10:12:00.000Z' }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          '/api/tables': {
+            get: {
+              tags: ['Admin Data'],
+              summary: 'List available admin tables and metadata',
+              security: [{ cookieAuth: [] }],
+              responses: {
+                '200': {
+                  description: 'Table metadata',
+                  content: {
+                    'application/json': {
+                      schema: {
+                        type: 'object',
+                        properties: {
+                          tables: {
+                            type: 'object',
+                            additionalProperties: { $ref: '#/components/schemas/TableConfig' }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          '/api/admin/overview': {
+            get: {
+              tags: ['Admin Data'],
+              summary: 'Get admin dashboard overview',
+              security: [{ cookieAuth: [] }],
+              responses: {
+                '200': {
+                  description: 'Overview summary',
+                  content: {
+                    'application/json': {
+                      schema: {
+                        type: 'object',
+                        properties: {
+                          overview: {
+                            type: 'object',
+                            properties: {
+                              players: { type: 'integer', example: 120 },
+                              active_players: { type: 'integer', example: 90 },
+                              completed_games: { type: 'integer', example: 350 },
+                              highest_score: { type: 'integer', example: 50000 },
+                              admin_actions: { type: 'integer', example: 44 }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          '/api/tables/{table}': {
+            get: {
+              tags: ['Admin Data'],
+              summary: 'Query rows from a table',
+              security: [{ cookieAuth: [] }],
+              parameters: [
+                {
+                  name: 'table',
+                  in: 'path',
+                  required: true,
+                  schema: { type: 'string' },
+                  description: 'Table name such as players, game_sessions, or admin_users'
+                },
+                {
+                  name: 'page',
+                  in: 'query',
+                  required: false,
+                  schema: { type: 'integer', default: 1 },
+                  description: 'Page number'
+                },
+                {
+                  name: 'limit',
+                  in: 'query',
+                  required: false,
+                  schema: { type: 'integer', default: 50 },
+                  description: 'Rows per page (max 100)'
+                },
+                {
+                  name: 'search',
+                  in: 'query',
+                  required: false,
+                  schema: { type: 'string' },
+                  description: 'Text search across visible columns'
+                }
+              ],
+              responses: {
+                '200': {
+                  description: 'Table data',
+                  content: {
+                    'application/json': {
+                      schema: {
+                        type: 'object',
+                        properties: {
+                          rows: {
+                            type: 'array',
+                            items: { $ref: '#/components/schemas/TableRow' }
+                          },
+                          config: { $ref: '#/components/schemas/TableConfig' },
+                          page: { type: 'integer', example: 1 },
+                          limit: { type: 'integer', example: 50 },
+                          total: { type: 'integer', example: 350 }
+                        }
+                      }
+                    }
+                  }
+                },
+                '404': { description: 'Table not found' }
+              }
+            },
+            post: {
+              tags: ['Admin Data'],
+              summary: 'Create a row in a table',
+              security: [{ cookieAuth: [] }],
+              parameters: [
+                {
+                  name: 'table',
+                  in: 'path',
+                  required: true,
+                  schema: { type: 'string' },
+                  description: 'Table name'
+                }
+              ],
+              requestBody: {
+                required: true,
+                content: {
+                  'application/json': {
+                    schema: { type: 'object', additionalProperties: true }
+                  }
+                }
+              },
+              responses: {
+                '201': {
+                  description: 'Inserted row',
+                  content: {
+                    'application/json': {
+                      schema: {
+                        type: 'object',
+                        properties: {
+                          row: { $ref: '#/components/schemas/TableRow' }
+                        }
+                      }
+                    }
+                  }
+                },
+                '400': { description: 'Table read-only or invalid record' }
+              }
+            }
+          },
+          '/api/tables/{table}/{id}': {
+            put: {
+              tags: ['Admin Data'],
+              summary: 'Update a row in a table',
+              security: [{ cookieAuth: [] }],
+              parameters: [
+                {
+                  name: 'table',
+                  in: 'path',
+                  required: true,
+                  schema: { type: 'string' },
+                  description: 'Table name'
+                },
+                {
+                  name: 'id',
+                  in: 'path',
+                  required: true,
+                  schema: { type: 'string' },
+                  description: 'Primary key value for the row to update'
+                }
+              ],
+              requestBody: {
+                required: true,
+                content: {
+                  'application/json': {
+                    schema: { type: 'object', additionalProperties: true }
+                  }
+                }
+              },
+              responses: {
+                '200': {
+                  description: 'Updated row',
+                  content: {
+                    'application/json': {
+                      schema: {
+                        type: 'object',
+                        properties: {
+                          row: { $ref: '#/components/schemas/TableRow' }
+                        }
+                      }
+                    }
+                  }
+                },
+                '400': { description: 'No editable fields supplied or forbidden self-action' },
+                '404': { description: 'Record not found' }
+              }
+            },
+            delete: {
+              tags: ['Admin Data'],
+              summary: 'Delete a row from a table',
+              security: [{ cookieAuth: [] }],
+              parameters: [
+                {
+                  name: 'table',
+                  in: 'path',
+                  required: true,
+                  schema: { type: 'string' },
+                  description: 'Table name'
+                },
+                {
+                  name: 'id',
+                  in: 'path',
+                  required: true,
+                  schema: { type: 'string' },
+                  description: 'Primary key value for the row to delete'
+                }
+              ],
+              responses: {
+                '200': {
+                  description: 'Delete successful',
+                  content: {
+                    'application/json': {
+                      schema: {
+                        type: 'object',
+                        properties: {
+                          ok: { type: 'boolean', example: true }
+                        }
+                      }
+                    }
+                  }
+                },
+                '404': { description: 'Record not found' }
+              }
+            }
+          },
+          '/api/admin/activity': {
+            get: {
+              tags: ['Admin Data'],
+              summary: 'Get recent admin activity logs',
+              security: [{ cookieAuth: [] }],
+              responses: {
+                '200': {
+                  description: 'Recent administrator actions',
+                  content: {
+                    'application/json': {
+                      schema: {
+                        type: 'object',
+                        properties: {
+                          logs: {
+                            type: 'array',
+                            items: {
+                              type: 'object',
+                              properties: {
+                                log_id: { type: 'integer', example: 11 },
+                                action: { type: 'string', example: 'update' },
+                                resource: { type: 'string', example: 'players' },
+                                record_id: { type: 'string', example: '12' },
+                                details: { type: 'object', additionalProperties: true },
+                                created_at: { type: 'string', format: 'date-time', example: '2026-09-21T10:15:00.000Z' },
+                                username: { type: 'string', example: 'owner' }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      };
+
+      SwaggerUIBundle({
+        spec,
+        dom_id: '#swagger-ui',
+        deepLinking: true,
+        persistAuthorization: true,
+        layout: 'BaseLayout',
+        withCredentials: true
+      });
+    </script>
+  </body>
+</html>
