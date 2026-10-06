@@ -26,3 +26,9 @@ SESSION_SECRET=change-this-secret-before-sharing
 ```powershell
 npm run smoke
 ```
+
+## Evidence
+
+- `docs/planning-log.md` records the four project stages with dated evidence.
+- `docs/development-evidence.md` summarises commit and screenshot evidence.
+- `docs/evidence/` contains dated admin dashboard screenshots.
