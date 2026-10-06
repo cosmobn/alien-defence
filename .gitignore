@@ -3,3 +3,5 @@
 server-*.log
 server-*.err.log
 node_modules/
+cookies.txt
+tmp-*.js
