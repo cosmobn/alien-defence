@@ -192,7 +192,7 @@ function renderRows() {
   const query = nodes.searchInput.value.trim().toLowerCase();
   const rows = state.rows.filter(row => {
     if (!query) return true;
-    return Object.values(row).some(value => String(value ?? '').toLowerCase().includes(query));
+    return Object.values(row).some(value => formatValue(value).toLowerCase().includes(query));
   });
 
   nodes.rowCount.textContent = rows.length;
@@ -335,6 +335,12 @@ function formatValue(value) {
   if (typeof value === 'boolean') return value ? 'Yes' : 'No';
   if (typeof value === 'string' && /^\d{4}-\d{2}-\d{2}T/.test(value)) {
     return new Date(value).toLocaleString();
+  }
+  if (Array.isArray(value)) return value.map(formatValue).join(', ');
+  if (typeof value === 'object') {
+    return Object.entries(value)
+      .map(([key, entry]) => `${labelize(key)}: ${formatValue(entry)}`)
+      .join('; ');
   }
   return String(value);
 }
